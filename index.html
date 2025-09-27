@@ -3,48 +3,49 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Compteur XP & Niveaux</title>
+  <title>Compteur XP, Cash & Boutique (Simulé)</title>
   <style>
     :root{--bg:#0f1724;--card:#0b1220;--accent:#7c3aed;--muted:#9aa4b2;--glass:rgba(255,255,255,0.04)}
     *{box-sizing:border-box}
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;color:#e6eef6;margin:0;background:linear-gradient(180deg,#071029 0%, #0b1220 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-    .layout{display:flex;gap:24px;align-items:stretch;width:100%;max-width:1080px}
-    .card{flex:2;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:22px;box-shadow:0 6px 30px rgba(2,6,23,0.6);backdrop-filter:blur(6px)}
-    .side{flex:1;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border-radius:14px;padding:22px;box-shadow:0 6px 20px rgba(2,6,23,0.5);backdrop-filter:blur(6px)}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;color:#e6eef6;margin:0;background:linear-gradient(180deg,#071029 0%, #0b1220 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
+    .layout{display:grid;grid-template-columns:1fr 340px;gap:18px;width:100%;max-width:1200px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:18px;box-shadow:0 6px 30px rgba(2,6,23,0.6);backdrop-filter:blur(6px)}
+    .side{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(2,6,23,0.5)}
     h1{margin:0 0 6px;font-size:20px}
-    p.lead{margin:0 0 18px;color:var(--muted)}
+    p.lead{margin:0 0 12px;color:var(--muted)}
 
-    .top{display:flex;gap:18px;align-items:center}
+    .row{display:flex;gap:12px;align-items:center}
     .stat{background:var(--glass);padding:12px;border-radius:10px;flex:1;text-align:center}
-    .big{font-size:26px;font-weight:700}
+    .big{font-size:24px;font-weight:700}
     .small{font-size:13px;color:var(--muted)}
 
-    .progress-wrap{margin-top:18px}
-    .progress{height:18px;background:rgba(255,255,255,0.04);border-radius:10px;overflow:hidden}
-    .progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#4f46e5);box-shadow:0 4px 18px rgba(124,58,237,0.25);transition:width 600ms cubic-bezier(.2,.9,.3,1)}
+    .progress{height:16px;background:rgba(255,255,255,0.04);border-radius:10px;overflow:hidden;margin-top:12px}
+    .progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#4f46e5);transition:width 600ms cubic-bezier(.2,.9,.3,1)}
     .progress-labels{display:flex;justify-content:space-between;margin-top:8px;font-size:13px;color:var(--muted)}
 
-    .controls{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap}
-    input[type=number]{width:120px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-    button{padding:10px 14px;border-radius:10px;border:0;cursor:pointer;background:linear-gradient(180deg,var(--accent),#4f46e5);color:white;font-weight:600}
+    .controls{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+    input[type=number], input[type=text]{width:140px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    button{padding:10px 12px;border-radius:10px;border:0;cursor:pointer;background:linear-gradient(180deg,var(--accent),#4f46e5);color:white;font-weight:700}
     .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:600}
 
-    footer{margin-top:18px;color:var(--muted);font-size:13px}
-    .flex-row{display:flex;gap:12px;align-items:center}
+    canvas{max-width:100%;height:160px}
+    .shop-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;margin-bottom:8px;background:rgba(255,255,255,0.02)}
+    .shop-item .meta{font-size:13px;color:var(--muted)}
 
-    .side h2{margin-top:0;font-size:18px}
-    .side ul{margin:0;padding-left:18px;line-height:1.6;color:var(--muted)}
+    .purchases{margin-top:10px;font-size:13px;color:var(--muted);max-height:120px;overflow:auto}
 
-    @media (max-width:760px){.layout{flex-direction:column}}
+    footer{margin-top:12px;color:var(--muted);font-size:13px}
+
+    @media (max-width:880px){.layout{grid-template-columns:1fr;}.side{order:2}}
   </style>
 </head>
 <body>
   <div class="layout">
     <div class="card">
       <h1>Compteur XP & Niveaux</h1>
-      <p class="lead">Tape un nombre (ex. 1) puis clique sur <strong>Ajouter XP</strong>. Le système calcule le niveau et la progression automatiquement.</p>
+      <p class="lead">Ajoute de l'XP (par session). Chaque niveau rapporte <strong>+50 cash</strong>. Le graphique montre les gains d'XP par session.</p>
 
-      <div class="top">
+      <div class="row">
         <div class="stat">
           <div class="small">Niveau</div>
           <div id="level" class="big">1</div>
@@ -54,173 +55,140 @@
           <div id="xpTotal" class="big">0</div>
         </div>
         <div class="stat">
-          <div class="small">XP pour le prochain niveau</div>
-          <div id="xpForNext" class="big">100</div>
+          <div class="small">Cash</div>
+          <div id="cashTotal" class="big">0</div>
         </div>
         <div class="stat">
-          <div class="small">XP total requis pour ce niveau</div>
-          <div id="xpCumulative" class="big">100</div>
+          <div class="small">€ convertis</div>
+          <div id="eurTotal" class="big">0</div>
+        </div>
+        <div class="stat">
+          <div class="small">Prochain niveau (XP)</div>
+          <div id="xpForNext" class="big">100</div>
         </div>
       </div>
 
-      <div class="progress-wrap">
-        <div class="progress" aria-hidden>
-          <i id="bar"></i>
-        </div>
-        <div class="progress-labels">
-          <div id="curLabel">0 / 100 XP</div>
-          <div id="pctLabel">0%</div>
-        </div>
-      </div>
+      <div class="progress"><i id="bar"></i></div>
+      <div class="progress-labels"><div id="curLabel">0 / 100 XP</div><div id="pctLabel">0%</div></div>
 
       <div class="controls">
-        <input id="xpInput" type="number" min="0" step="1" value="1" aria-label="Quantité d'XP à ajouter" />
+        <input id="xpInput" type="number" min="0" step="1" value="1" aria-label="XP à ajouter" />
         <button id="addBtn">Ajouter XP</button>
         <button id="add5" class="ghost">+5 XP</button>
         <button id="add10" class="ghost">+10 XP</button>
         <button id="reset" class="ghost">Réinitialiser</button>
-        <div style="margin-left:auto" class="flex-row">
-          <label class="small" for="persist">Sauvegarde locale</label>
-          <input id="persist" type="checkbox" checked />
-        </div>
       </div>
 
-      <footer>Formule : XP requis pour le niveau <em>n</em> = 100 × (1.25^(n-1)). Le cumul est affiché dans la 4e case.</footer>
+      <div style="margin-top:14px">
+        <canvas id="xpChart" aria-label="Graphique XP par session"></canvas>
+      </div>
+
+      <footer>Progression: XP requis pour le niveau n = 100 × (1.25^(n-1)). Cash fixe: +50 par niveau.</footer>
     </div>
 
     <div class="side">
-      <h2>Équivalences</h2>
-      <ul>
-        <li>1 pompe = 1 XP</li>
-        <li>1 squat = 2 XP</li>
-        <li>1 burpee = 5 XP</li>
-        <li>1 min de gainage = 10 XP</li>
-      </ul>
+      <h2>Boutique & Conversion Cash</h2>
+
+      <div style="margin-bottom:8px">
+        <label class="small">Cash disponible</label>
+        <div id="cashAvailable" class="big">0</div>
+        <div class="controls" style="margin-top:6px">
+          <input id="cashToEUR" type="number" min="1" step="1" value="50" />
+          <button id="convertCashBtn">Convertir en €</button>
+        </div>
+        <div class="small" style="margin-top:6px;color:var(--muted)">Taux: 1€ = 50 cash. La conversion réduit le cash disponible et augmente le compteur €.</div>
+      </div>
+
+      <h3 style="margin:8px 0 6px">Articles</h3>
+      <div id="shop"></div>
+
+      <h3 style="margin-top:10px">Achats & conversions</h3>
+      <div class="purchases" id="purchases"></div>
+
+      <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+        <button id="clearPurchases" class="ghost">Effacer historique</button>
+        <button id="resetAll" class="ghost">Réinitialiser tout</button>
+      </div>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    const KEY = 'xp_levels_v1';
-
+    const KEY = 'xp_shop_cash_v5';
     const levelEl = document.getElementById('level');
     const xpTotalEl = document.getElementById('xpTotal');
     const xpForNextEl = document.getElementById('xpForNext');
-    const xpCumulativeEl = document.getElementById('xpCumulative');
     const barEl = document.getElementById('bar');
     const curLabel = document.getElementById('curLabel');
     const pctLabel = document.getElementById('pctLabel');
+    const cashTotalEl = document.getElementById('cashTotal');
+    const cashAvailableEl = document.getElementById('cashAvailable');
+    const eurTotalEl = document.getElementById('eurTotal');
 
     const xpInput = document.getElementById('xpInput');
     const addBtn = document.getElementById('addBtn');
     const add5 = document.getElementById('add5');
     const add10 = document.getElementById('add10');
     const resetBtn = document.getElementById('reset');
-    const persistChk = document.getElementById('persist');
 
-    let state = { xp: 0 };
+    const cashToEUR = document.getElementById('cashToEUR');
+    const convertCashBtn = document.getElementById('convertCashBtn');
 
-    function xpForLevel(lvl){
-      return Math.round(100 * Math.pow(1.25, lvl - 1));
-    }
+    const shopEl = document.getElementById('shop');
+    const purchasesEl = document.getElementById('purchases');
+    const clearPurchases = document.getElementById('clearPurchases');
+    const resetAll = document.getElementById('resetAll');
 
-    function totalXpForLevel(lvl){
-      let sum = 0;
-      for(let i=1;i<=lvl;i++){
-        sum += xpForLevel(i);
-      }
-      return sum;
-    }
+    const defaultState = { xp:0, cash:0, eur:0, sessions:[], purchases:[], cashRate:50 };
+    let state = {...defaultState};
 
-    function xpToLevel(totalXP){
-      let lvl = 1;
-      let required = xpForLevel(lvl);
-      let sum = 0;
-      while(totalXP >= sum + required){
-        sum += required;
-        lvl++;
-        required = xpForLevel(lvl);
-      }
-      return lvl;
-    }
+    const SHOP_ITEMS = [
+      { id:'skin1', title:'Skin spécial', priceCash:100, desc:'Skin visuel (fictif)'},
+      { id:'boost1', title:'Boost XP (5min)', priceCash:50, desc:'+20% XP pour 5 minutes (simulé)'},
+      { id:'badge1', title:'Badge exclusif', priceCash:200, desc:'Badge de collection (fictif)'}
+    ];
 
-    function xpProgress(totalXP, lvl){
-      let sum = 0;
-      for(let i=1;i<lvl;i++){
-        sum += xpForLevel(i);
-      }
-      const needed = xpForLevel(lvl);
-      const currentTowards = totalXP - sum;
-      return {currentTowards, needed};
-    }
+    function xpForLevel(lvl){ return Math.round(100*Math.pow(1.25,lvl-1)); }
+    function xpToLevel(totalXP){ let lvl=1,sum=0,req=xpForLevel(lvl); while(totalXP>=sum+req){sum+=req;lvl++;req=xpForLevel(lvl);} return lvl; }
+    function xpProgress(totalXP,lvl){ let sum=0; for(let i=1;i<lvl;i++) sum+=xpForLevel(i); return {currentTowards: totalXP-sum, needed: xpForLevel(lvl)}; }
 
-    function save(){
-      if(persistChk.checked){
-        localStorage.setItem(KEY, JSON.stringify(state));
-      }
-    }
+    function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+    function load(){ try{ const raw=localStorage.getItem(KEY); if(raw) state=JSON.parse(raw);}catch(e){console.warn(e);} }
 
-    function load(){
-      try{
-        const raw = localStorage.getItem(KEY);
-        if(raw){ state = JSON.parse(raw); }
-      }catch(e){ console.warn('Impossible de charger le stockage'); }
-    }
+    let chart;
+    function initChart(){ const ctx=document.getElementById('xpChart').getContext('2d'); chart=new Chart(ctx,{type:'line', data:{labels:state.sessions.map(s=>new Date(s.t).toLocaleTimeString()), datasets:[{label:'XP par session',data:state.sessions.map(s=>s.xp),fill:false,tension:0.2}]}, options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}}); }
+    function updateChart(){ if(!chart) return initChart(); chart.data.labels=state.sessions.map(s=>new Date(s.t).toLocaleTimeString()); chart.data.datasets[0].data=state.sessions.map(s=>s.xp); chart.update(); }
 
     function updateUI(){
-      const total = Math.max(0, Math.floor(state.xp));
-      const lvl = xpToLevel(total);
-      const {currentTowards, needed} = xpProgress(total, lvl);
-      const pct = Math.round((currentTowards / needed) * 100);
-
-      levelEl.textContent = lvl;
-      xpTotalEl.textContent = total;
-      xpForNextEl.textContent = needed;
-      xpCumulativeEl.textContent = totalXpForLevel(lvl);
-      curLabel.textContent = `${currentTowards} / ${needed} XP`;
-      pctLabel.textContent = `${isFinite(pct)?pct:0}%`;
-      barEl.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+      const total=Math.max(0,Math.floor(state.xp));
+      const lvl=xpToLevel(total);
+      const {currentTowards, needed}=xpProgress(total,lvl);
+      const pct=Math.round((currentTowards/needed)*100);
+      levelEl.textContent=lvl; xpTotalEl.textContent=total; xpForNextEl.textContent=needed;
+      curLabel.textContent=`${currentTowards} / ${needed} XP`; pctLabel.textContent=`${pct}%`; barEl.style.width=`${Math.min(100,Math.max(0,pct))}%`;
+      cashTotalEl.textContent=state.cash; cashAvailableEl.textContent=state.cash; eurTotalEl.textContent=state.eur.toFixed(2);
+      renderShop(); renderPurchases(); updateChart(); save();
     }
 
-    function addXP(amount){
-      amount = Number(amount) || 0;
-      state.xp += amount;
-      if(state.xp < 0) state.xp = 0;
-      save();
-      updateUI();
-    }
+    function addXP(amount){ amount=Math.max(0,Math.floor(Number(amount)||0)); if(amount===0) return; const beforeLevel=xpToLevel(state.xp); state.xp+=amount; state.sessions.push({xp:amount,t:Date.now()}); const afterLevel=xpToLevel(state.xp); if(afterLevel>beforeLevel){ const levelsGained=afterLevel-beforeLevel; state.cash+=levelsGained*50; state.purchases.push({type:'levelReward',lvlFrom:beforeLevel+1,levels:levelsGained,cash:levelsGained*50,t:Date.now()}); } updateUI(); }
 
-    addBtn.addEventListener('click', ()=> addXP(xpInput.value));
-    add5.addEventListener('click', ()=> addXP(5));
-    add10.addEventListener('click', ()=> addXP(10));
-    resetBtn.addEventListener('click', ()=>{
-      if(confirm('Réinitialiser le compteur XP ?')){
-        state = { xp: 0 };
-        save();
-        updateUI();
-      }
-    });
+    addBtn.addEventListener('click',()=>{ addXP(xpInput.value); xpInput.value=1; });
+    add5.addEventListener('click',()=>addXP(5));
+    add10.addEventListener('click',()=>addXP(10));
+    resetBtn.addEventListener('click',()=>{ if(confirm('Réinitialiser tout ?')){ state={...defaultState}; save(); updateUI(); } });
 
-    persistChk.addEventListener('change', ()=>{
-      if(!persistChk.checked){
-        localStorage.removeItem(KEY);
-      } else {
-        save();
-      }
-    });
+    function renderShop(){ shopEl.innerHTML=''; SHOP_ITEMS.forEach(item=>{ const bought=state.purchases.some(p=>p.type==='buy'&&p.id===item.id); const div=document.createElement('div'); div.className='shop-item'; div.innerHTML=`<div><strong>${item.title}</strong><div class=\"meta\">${item.desc}</div></div>`; const right=document.createElement('div'); right.innerHTML=`<div class=\"meta\">${item.priceCash} cash</div>`; const btn=document.createElement('button'); btn.textContent=bought?'Déjà acheté':'Acheter'; btn.disabled=bought||state.cash<item.priceCash; btn.style.marginLeft='8px'; btn.addEventListener('click',()=>buyItem(item)); right.appendChild(btn); div.appendChild(right); shopEl.appendChild(div); }); }
 
-    xpInput.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter') addXP(xpInput.value);
-    });
+    function buyItem(item){ if(state.cash<item.priceCash){ alert('Pas assez de cash'); return; } state.cash-=item.priceCash; state.purchases.push({type:'buy',id:item.id,title:item.title,priceCash:item.priceCash,t:Date.now()}); updateUI(); }
 
-    load();
-    updateUI();
+    function renderPurchases(){ purchasesEl.innerHTML=''; state.purchases.slice().reverse().forEach(p=>{ const d=document.createElement('div'); if(p.type==='buy') d.textContent=`${new Date(p.t).toLocaleString()} — Achat: ${p.title} (-${p.priceCash} cash)`; else if(p.type==='levelReward') d.textContent=`${new Date(p.t).toLocaleString()} — Niveau x${p.levels}: +${p.cash} cash`; else if(p.type==='convert') d.textContent=`${new Date(p.t).toLocaleString()} — Conversion: +${(p.cash/state.cashRate).toFixed(2)} €`; purchasesEl.appendChild(d); }); }
 
-    let clicks = 0;
-    levelEl.addEventListener('click', ()=>{
-      clicks++;
-      if(clicks >= 5){ addXP(1000); clicks = 0; alert('Easter egg: +1000 XP !'); }
-      setTimeout(()=> clicks = 0, 800);
-    });
+    convertCashBtn.addEventListener('click',()=>{ const amount=parseInt(cashToEUR.value)||0; if(amount<=0) return alert('Entrée invalide'); if(amount>state.cash) return alert('Pas assez de cash'); const euros=parseFloat((amount/state.cashRate).toFixed(2)); state.cash-=amount; state.eur+=euros; state.purchases.push({type:'convert',cash:amount,t:Date.now(),euros:euros}); alert(`Converti ${amount} cash en ${euros} €`); updateUI(); });
+
+    clearPurchases.addEventListener('click',()=>{ if(confirm('Effacer historique ?')){ state.purchases=[]; updateUI(); } });
+    resetAll.addEventListener('click',()=>{ if(confirm('Réinitialiser tout ?')){ state={...defaultState}; save(); updateUI(); } });
+
+    load(); initChart(); updateUI();
   </script>
 </body>
 </html>
